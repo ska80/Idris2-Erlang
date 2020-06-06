@@ -16,7 +16,7 @@ import Data.Maybe
 import Data.Nat
 
 import Libraries.Data.IntMap
-import Libraries.Data.IOArray
+import Erlang.Data.IOArray
 import Libraries.Data.NameMap
 import Libraries.Data.UserNameMap
 import Libraries.Utils.Binary

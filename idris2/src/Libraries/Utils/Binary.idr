@@ -1,9 +1,10 @@
 module Libraries.Utils.Binary
 
-import Data.Buffer
+import Erlang.Data.Buffer
 import Data.List
 
-import System.File
+import System.Info
+import Erlang.System.File
 
 import Libraries.Utils.String
 

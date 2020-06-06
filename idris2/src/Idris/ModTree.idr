@@ -23,9 +23,9 @@ import Data.List
 import Data.Either
 import Data.String
 
-import System
-import System.Directory
-import System.File
+import Erlang.System
+import Erlang.System.Directory
+import Erlang.System.File
 
 import Libraries.Data.StringMap
 import Libraries.Data.String.Extra as Extra

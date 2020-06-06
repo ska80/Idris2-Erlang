@@ -16,7 +16,7 @@ import Core.Options
 import Core.Ord
 import Core.TT
 import Core.TTC
-import Libraries.Data.IOArray
+import Erlang.Data.IOArray
 import Libraries.Data.SortedMap
 import Libraries.Utils.Path
 
@@ -27,9 +27,9 @@ import Data.String as String
 
 import Idris.Env
 
-import System.Directory
+import Erlang.System.Directory
 import System.Info
-import System.File
+import Erlang.System.File
 
 %default covering
 

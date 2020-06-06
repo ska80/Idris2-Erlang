@@ -25,7 +25,7 @@ import Libraries.Text.PrettyPrint.Prettyprinter
 
 import Data.List
 import Data.String
-import System.File
+import Erlang.System.File
 
 %default covering
 
