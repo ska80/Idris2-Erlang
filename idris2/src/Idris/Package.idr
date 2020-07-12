@@ -279,7 +279,7 @@ addDeps : {auto c : Ref Ctxt Defs} ->
           PkgDesc -> Core ()
 addDeps pkg
     = do defs <- get Ctxt
-         traverse_ (\p => addPkgDir p.pkgname p.pkgbounds) (depends pkg)
+         traverse_ (\p => addPkg p.pkgname) (depends pkg)
 
 processOptions : {auto c : Ref Ctxt Defs} ->
                  {auto o : Ref ROpts REPLOpts} ->
@@ -895,4 +895,4 @@ findIpkg fname
         = if x == str then xs else x :: xs
 
     loadDependencies : List Depends -> Core ()
-    loadDependencies = traverse_ (\p => addPkgDir p.pkgname p.pkgbounds)
+    loadDependencies = traverse_ (\p => addPkg p.pkgname)
