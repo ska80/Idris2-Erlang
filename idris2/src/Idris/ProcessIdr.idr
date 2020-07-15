@@ -96,10 +96,10 @@ readModule full loc vis imp as
     = do defs <- get Ctxt
          let False = (imp, vis, as) `elem` map snd (allImported defs)
              | True => when vis (setVisible (miAsNamespace imp))
-         Right fname <- nsToPath loc imp
+         Right modLoc <- nsToPath loc imp
                | Left err => throw err
          Just (syn, hash, more) <- readFromTTC False {extra = SyntaxInfo}
-                                                  loc vis fname imp as
+                                                  loc vis modLoc imp as
               | Nothing => when vis (setVisible (miAsNamespace imp)) -- already loaded, just set visibility
          extendSyn syn
 
@@ -136,9 +136,9 @@ readImportMeta : {auto c : Ref Ctxt Defs} ->
                  {auto u : Ref UST UState} ->
                  Import -> Core (Bool, (Namespace, Int))
 readImportMeta imp
-    = do Right ttcFileName <- nsToPath (loc imp) (path imp)
+    = do Right ttcModLoc <- nsToPath (loc imp) (path imp)
                | Left err => throw err
-         (_, interfaceHash) <- readHashes ttcFileName
+         (_, interfaceHash) <- readHashes ttcModLoc
          pure (reexport imp, (nameAs imp, interfaceHash))
 
 prelude : Import
@@ -162,7 +162,7 @@ readAsMain : {auto c : Ref Ctxt Defs} ->
              (fname : String) -> Core ()
 readAsMain fname
     = do Just (syn, _, more) <- readFromTTC {extra = SyntaxInfo}
-                                             True EmptyFC True fname (nsAsModuleIdent emptyNS) emptyNS
+                                             True EmptyFC True (LocalFile fname) (nsAsModuleIdent emptyNS) emptyNS
               | Nothing => throw (InternalError "Already loaded")
 
          replNS <- getNS
@@ -242,7 +242,7 @@ unchangedHash : (hashFn : Maybe String) -> (sourceFileName : String) -> (ttcFile
 unchangedHash hashFn sourceFileName ttcFileName
   = do Just sourceCodeHash        <- hashFileWith hashFn sourceFileName
              | _ => pure False
-       (Just storedSourceHash, _) <- readHashes ttcFileName
+       (Just storedSourceHash, _) <- readHashes (LocalFile ttcFileName)
              | _ => pure False
        pure $ sourceCodeHash == storedSourceHash
 

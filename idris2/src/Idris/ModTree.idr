@@ -177,7 +177,7 @@ checkDepHashes depFileName
               Just depCodeHash       <- hashFileWith (defs.options.hashFn) depFileName
                     | _ => pure False
               depTTCFileName         <- getTTCFileName depFileName "ttc"
-              (Just depStoredCodeHash, _) <- readHashes depTTCFileName
+              (Just depStoredCodeHash, _) <- readHashes (LocalFile depTTCFileName)
                     | _ => pure False
               pure $ depCodeHash /= depStoredCodeHash)
           (\error => pure False)
@@ -188,15 +188,15 @@ needsBuildingHash : {auto c : Ref Ctxt Defs} ->
                     (sourceFile : String) -> (ttcFile : String) ->
                     (depFiles : List String) -> Core Bool
 needsBuildingHash sourceFile ttcFile depFiles
-  = do defs                <- get Ctxt
-       -- If there's no hash available, either in the TTC or from the
-       -- current source, then it needs building
-       Just codeHash       <- hashFileWith (defs.options.hashFn) sourceFile
+  = do  defs                <- get Ctxt
+        -- If there's no hash available, either in the TTC or from the
+        -- current source, then it needs building
+        Just codeHash       <- hashFileWith (defs.options.hashFn) sourceFile
              | _ => pure True
-       (Just storedCodeHash, _) <- readHashes ttcFile
+        (Just storedCodeHash, _) <- readHashes (LocalFile ttcFile)
              | _ => pure True
-       depFilesHashDiffers <- any id <$> traverse checkDepHashes depFiles
-       pure $ codeHash /= storedCodeHash || depFilesHashDiffers
+        depFilesHashDiffers <- any id <$> traverse checkDepHashes depFiles
+        pure $ codeHash /= storedCodeHash || depFilesHashDiffers
 
 export
 needsBuilding :
