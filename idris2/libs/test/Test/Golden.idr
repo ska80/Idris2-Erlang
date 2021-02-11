@@ -79,11 +79,9 @@ import Data.List
 import Data.List1
 import Data.String
 
-import System
-import System.Clock
-import System.Directory
-import System.File
-import System.Future
+import Erlang.System
+import Erlang.System.Directory
+import Erlang.System.File
 import System.Info
 import System.Path
 
@@ -203,14 +201,12 @@ guardPath s = "\"" ++ s ++ "\""
 ||| See the module documentation for more information.
 ||| @testPath the directory that contains the test.
 export
-runTest : Options -> (testPath : String) -> IO (Future Result)
-runTest opts testPath = forkIO $ do
-  start <- clockTime UTC
+runTest : Options -> (testPath : String) -> IO Result
+runTest opts testPath = do
   let cg = maybe "" (" --cg " ++) (codegen opts)
   let exe = "\"" ++ exeUnderTest opts ++ cg ++ "\""
   ignore $ system $ "cd " ++ guardPath testPath ++ " && " ++
     "sh ./run " ++ exe ++ " | tr -d '\\r' > output"
-  end <- clockTime UTC
 
   Right out <- readFile $ testPath ++ "/output"
     | Left err => do putStrLn $ (testPath ++ "/output") ++ ": " ++ show err
@@ -226,13 +222,12 @@ runTest opts testPath = forkIO $ do
                      pure (Left testPath)
 
   let result = normalize out == normalize exp
-  let time = timeDifference end start
 
   if result
-    then printTiming (timing opts) time testPath $
+    then printTiming (timing opts) testPath $
       (if opts.color then show . colored BrightGreen else id) "success"
     else do
-      printTiming (timing opts) time testPath $
+      printTiming (timing opts) testPath $
         (if opts.color then show . colored BrightRed else id) "FAILURE"
       if interactive opts
         then mayOverwrite (Just exp) out
@@ -276,16 +271,8 @@ runTest opts testPath = forkIO $ do
                     | Left err => putStrLn $ (testPath ++ "/expected") ++ ": " ++ show err
                   pure ()
 
-    printTiming : Bool -> Clock type -> String -> String -> IO ()
-    printTiming False _     path msg = putStrLn $ concat [path, ": ", msg]
-    printTiming True  clock path msg =
-      let time  = showTime 2 3 clock
-          -- We use 9 instead of `String.length msg` because:
-          -- 1. ": success" and ": FAILURE" have the same length
-          -- 2. ANSI escape codes make the msg look longer than it is
-          spent = String.length time + String.length path + 9
-          pad   = pack $ replicate (minus 72 spent) ' '
-      in putStrLn $ concat [path, ": ", msg, pad, time]
+    printTiming : Bool -> String -> String -> IO ()
+    printTiming _ path msg = putStrLn $ concat [path, ": ", msg]
 
 ||| Find the first occurrence of an executable on `PATH`.
 export
@@ -493,7 +480,7 @@ poolRunner opts pool
     loop opts acc [] = pure acc
     loop opts acc tests
       = do let (now, later) = splitAt opts.threads tests
-           bs <- map await <$> traverse (runTest opts) now
+           bs <- traverse (runTest opts) now
            loop opts (updateSummary bs acc) later
 
 
