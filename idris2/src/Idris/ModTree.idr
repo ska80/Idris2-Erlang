@@ -261,7 +261,7 @@ buildMod loc num len mod
           , sourceFile
           , "(" ++ ttcFile ++ ")"
           ]
-        rebuild <- needsBuilding sourceFile ttcFile depFiles
+        rebuild <- needsBuilding sourceFile ttcFile (map filenameFromModuleLocation depFiles)
 
         u <- newRef UST initUState
         m <- newRef MD (initMetadata (PhysicalIdrSrc modNamespace))
