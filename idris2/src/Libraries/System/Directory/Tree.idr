@@ -6,11 +6,24 @@ import Data.DPair
 import Data.List
 import Data.Nat
 import Data.String
-import System.Directory
-import System.File
+import Erlang.Data.Buffer
+import Erlang.System.Directory
+import Erlang.System.File
 import Libraries.Utils.Path
 
 %default total
+
+
+-- TODO: Implement functions in `Erlang.System.File` or replace them in this module
+export
+data Directory : Type where [external]
+
+openDir : HasIO io => String -> io (Either FileError Directory)
+openDir d = pure $ Left (GenericFileError 42)
+closeDir : HasIO io => Directory -> io ()
+closeDir d = pure ()
+dirEntry : HasIO io => Directory -> io (Either FileError String)
+dirEntry d = pure $ Left (GenericFileError 42)
 
 ------------------------------------------------------------------------------
 -- Filenames
